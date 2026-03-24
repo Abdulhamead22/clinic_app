@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/cubit/clinic_state.dart';
 import 'package:flutter_application_1/models/appointment_models.dart';
+import 'package:flutter_application_1/models/doctor_user_model.dart';
 import 'package:flutter_application_1/modules/appointments/add_appointment_screen.dart';
 import 'package:flutter_application_1/shared/widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,29 +21,25 @@ class AppointmentsPatientScreen extends StatelessWidget {
       },
       builder: (context, state) {
         var cubit = ClinicCubit.get(context);
+        var filtered = cubit.appoin.where((a) {
+          if (cubit.selectedDocotrFilter == null) {
+            return true; // رجع كل شيء
+          } else {
+            //رجع المواعيد حسب الدكتور
+            return a.doctorId == cubit.selectedDocotrFilter!.doctorId;
+          }
+        }).toList();
         List<AppointmentModels> upcoming =
-            cubit.appoin.where((e) => e.status == 'upcoming').toList();
+            filtered.where((e) => e.status == 'upcoming').toList();
 
         List<AppointmentModels> completed =
-            cubit.appoin.where((e) => e.status == 'complete').toList();
+            filtered.where((e) => e.status == 'complete').toList();
 
         List<AppointmentModels> cancel =
-            cubit.appoin.where((e) => e.status == 'cancel').toList();
+            filtered.where((e) => e.status == 'cancel').toList();
         return DefaultTabController(
           length: 3,
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text("My Appointments"),
-              bottom: const TabBar(
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.black,
-                tabs: [
-                  Tab(text: "Upcoming"),
-                  Tab(text: "Completed"),
-                  Tab(text: "Cancel"),
-                ],
-              ),
-            ),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
                 await navigatTo(context, const AddAppointmentScreen());
@@ -52,11 +49,58 @@ class AppointmentsPatientScreen extends StatelessWidget {
                 Icons.add,
               ),
             ),
-            body: TabBarView(
+            body: Column(
               children: [
-                buildAppointments(upcoming, cancelAppointment: true),
-                buildAppointments(completed, cancelAppointment: false),
-                buildAppointments(cancel, cancelAppointment: false),
+                DropdownButtonFormField<DoctorUserModel>(
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
+                      fillColor: Colors.black
+                      // filled: true,
+                      ),
+                  value: cubit.selectedDocotrFilter,
+                  items: [
+                    const DropdownMenuItem<DoctorUserModel>(
+                      value: null,
+                      child: Text("All Doctors"),
+                    ),
+                    //... : فك العناصر من List وحطهم مباشرة داخل List ثانية
+                    ...cubit.doctors.map((doctor) {
+                      return DropdownMenuItem<DoctorUserModel>(
+                        value: doctor,
+                        child: Text(doctor.name),
+                      );
+                    })
+                  ],
+                  onChanged: (value) {
+                    
+                      cubit.changeFilterDoctor(value);
+                    
+                  },
+                  hint: const Text('Choose Doctor'),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const TabBar(
+                  labelColor: Colors.blue,
+                  unselectedLabelColor: Colors.black,
+                  tabs: [
+                    Tab(text: "Upcoming"),
+                    Tab(text: "Completed"),
+                    Tab(text: "Cancel"),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      buildAppointments(upcoming, cancelAppointment: true),
+                      buildAppointments(completed, cancelAppointment: false),
+                      buildAppointments(cancel, cancelAppointment: false),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -77,13 +121,13 @@ class AppointmentsPatientScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'My Appointments',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
+                // Text(
+                //   'My Appointments',
+                //   style: Theme.of(context).textTheme.headlineSmall,
+                // ),
+                // const SizedBox(
+                //   height: 15,
+                // ),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),

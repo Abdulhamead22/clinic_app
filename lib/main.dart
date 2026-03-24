@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => ClinicCubit()
         ..getUserPatientData()
-        ..getAppointmentsData(),
+        ..getAppointmentsData()
+        ..getUserDoctorData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',

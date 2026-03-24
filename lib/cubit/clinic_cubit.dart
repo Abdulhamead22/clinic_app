@@ -21,6 +21,7 @@ class ClinicCubit extends Cubit<ClinicState> {
   AppointmentModels? appointmentModels;
   PatientUserModel? patientModel;
   DoctorUserModel? doctorModel;
+  DoctorUserModel? selectedDocotrFilter;
 
   //دالة جلب بيانات المريض
   void getUserPatientData() {
@@ -113,12 +114,10 @@ class ClinicCubit extends Cubit<ClinicState> {
   }
 
   //اضافة موعد
-  void addAppointmentsPatient(
-     {
-     required String time,
-     required String date,
-   }
-  ) {
+  void addAppointmentsPatient({
+    required String time,
+    required String date,
+  }) {
     emit(ClinicAddAppointmentsLoadingState());
 
     var dataId = FirebaseFirestore.instance.collection('appointments').doc();
@@ -179,8 +178,7 @@ class ClinicCubit extends Cubit<ClinicState> {
   }
 
 //تحديث الحالة
-  void updateStatusAppointment(
-      String appointmentId, String status) {
+  void updateStatusAppointment(String appointmentId, String status) {
     FirebaseFirestore.instance
         .collection('appointments')
         .doc(appointmentId)
@@ -188,7 +186,6 @@ class ClinicCubit extends Cubit<ClinicState> {
       (value) {
         emit(ClinicUpdateStatusSuccessState());
         getAppointmentsData();
-
       },
     ).catchError((error) {
       print('Upadate Error ');
@@ -216,7 +213,7 @@ class ClinicCubit extends Cubit<ClinicState> {
       emit(ClinicCheckAppointmentsErrorState());
     } else {
       // الوقت متاح → أضف الموعد
-      addAppointmentsPatient(date: date,time: time);
+      addAppointmentsPatient(date: date, time: time);
 
       emit(ClinicCheckAppointmentsSuccessState());
     }
@@ -237,4 +234,10 @@ class ClinicCubit extends Cubit<ClinicState> {
   //     emit(ClinicDeleteAppointmentsErrorState());
   //   });
   // }
+
+//تغيير الدكتور حسب الفلترة
+  void changeFilterDoctor(selectedFilter) {
+    selectedDocotrFilter = selectedFilter;
+    emit(ClinicChangeDoctorFilterState());
+  }
 }

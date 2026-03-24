@@ -50,3 +50,5 @@ class ClinicCancelAppointmentsLoadingState extends ClinicState {}
 class ClinicCancelAppointmentsSuccessState extends ClinicState {}
 
 class ClinicCancelAppointmentsErrorState extends ClinicState {}
+
+class ClinicChangeDoctorFilterState extends ClinicState{}
