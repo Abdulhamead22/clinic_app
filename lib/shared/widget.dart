@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/models/appointment_models.dart';
@@ -189,9 +190,23 @@ Future<bool?> toast(String text, Color color) {
 // }
 
 Card appointmentCard(context, String type, AppointmentModels model,
-    {required bool cancelAppointment}) {
+     ) {
+  Color? statusColor;
+
+  switch (model.status) {
+    case 'complete':
+      statusColor = Colors.green.shade50;
+      break;
+    case 'upcoming':
+      statusColor = Colors.yellow.shade50;
+      break;
+    case 'cancel':
+      statusColor = Colors.red.shade50;
+      break;
+  }
   return Card(
-    elevation: 3,
+    elevation: 5,
+    color: Colors.white,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     ),
@@ -210,7 +225,7 @@ Card appointmentCard(context, String type, AppointmentModels model,
                   fontSize: 16,
                 ),
               ),
-              if (cancelAppointment == true || type != 'doctor')
+              if (type != 'doctor')
                 IconButton(
                   onPressed: () {
                     alertDialog(context, model);
@@ -241,11 +256,7 @@ Card appointmentCard(context, String type, AppointmentModels model,
           ),
           Chip(
             label: Text(model.status.toUpperCase()),
-            backgroundColor: model.status == 'complete'
-                ? Colors.green.shade100
-                : model.status == 'upcoming'
-                    ? Colors.yellow.shade100
-                    : Colors.red.shade100,
+            backgroundColor: statusColor,
             labelStyle: TextStyle(
               fontWeight: FontWeight.bold,
               color: model.status == 'complete'
@@ -258,40 +269,34 @@ Card appointmentCard(context, String type, AppointmentModels model,
           const SizedBox(
             height: 5,
           ),
-          if (type == 'doctor')
+          if (type == 'doctor' && model.status == 'upcoming')
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                defaultButton(
-                    function: () {
-                      ClinicCubit.get(context).updateStatusAppointment(
-                          model.appointmentId, 'upcoming');
-                    },
-                    fontsize: 12,
-                    radies: 5,
-                    width: 100,
-                    backgraund: Colors.yellow,
-                    text: "upcoming"),
-                defaultButton(
+                Expanded(
+                  child: defaultButton(
                     function: () {
                       ClinicCubit.get(context).updateStatusAppointment(
                           model.appointmentId, 'complete');
                     },
                     fontsize: 12,
-                    radies: 5,
-                    width: 100,
+                    radies: 8,
                     backgraund: Colors.green,
-                    text: "Complete"),
-                defaultButton(
+                    text: "Complete",
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: defaultButton(
                     function: () {
                       ClinicCubit.get(context).updateStatusAppointment(
                           model.appointmentId, 'cancel');
                     },
                     fontsize: 12,
-                    radies: 5,
-                    width: 100,
+                    radies: 8,
                     backgraund: Colors.red,
-                    text: "Cancel"),
+                    text: "Cancel",
+                  ),
+                ),
               ],
             ),
           if (type == 'doctor')
@@ -370,7 +375,44 @@ void alertDialog(context, AppointmentModels model) {
         false, //مسؤولة عن امكانية غلق الشاشة عند الضغط على اي مكان بالصفحة
   );
 }
-
+  ConditionalBuilder buildAppointments(List<AppointmentModels> appointment,
+      {required String type}) {
+    return ConditionalBuilder(
+      condition: appointment.isNotEmpty,
+      builder: (context) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        appointmentCard(context, type, appointment[index],
+                        ),
+                      ],
+                    );
+                  },
+                  separatorBuilder: (context, index) => myDrevider(),
+                  itemCount: appointment.length,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      fallback: (context) => 
+  
+         emptyState(context),
+      
+    );
+  }
 emptyState(context) {
   return Center(
     child: Column(

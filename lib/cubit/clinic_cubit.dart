@@ -235,6 +235,9 @@ class ClinicCubit extends Cubit<ClinicState> {
   //   });
   // }
 
+
+
+
 //تغيير الدكتور حسب الفلترة
   void changeFilterDoctor(selectedFilter) {
     selectedDocotrFilter = selectedFilter;

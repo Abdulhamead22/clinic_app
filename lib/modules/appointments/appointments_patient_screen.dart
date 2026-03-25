@@ -1,4 +1,3 @@
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/cubit/clinic_state.dart';
@@ -74,9 +73,7 @@ class AppointmentsPatientScreen extends StatelessWidget {
                     })
                   ],
                   onChanged: (value) {
-                    
-                      cubit.changeFilterDoctor(value);
-                    
+                    cubit.changeFilterDoctor(value);
                   },
                   hint: const Text('Choose Doctor'),
                 ),
@@ -95,9 +92,18 @@ class AppointmentsPatientScreen extends StatelessWidget {
                 Expanded(
                   child: TabBarView(
                     children: [
-                      buildAppointments(upcoming, cancelAppointment: true),
-                      buildAppointments(completed, cancelAppointment: false),
-                      buildAppointments(cancel, cancelAppointment: false),
+                      buildAppointments(
+                        upcoming,
+                        type: 'patient',
+                      ),
+                      buildAppointments(
+                        completed,
+                        type: 'patient',
+                      ),
+                      buildAppointments(
+                        cancel,
+                        type: 'patient',
+                      ),
                     ],
                   ),
                 ),
@@ -106,59 +112,6 @@ class AppointmentsPatientScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  ConditionalBuilder buildAppointments(List<AppointmentModels> appointment,
-      {required cancelAppointment}) {
-    return ConditionalBuilder(
-      condition: appointment.isNotEmpty,
-      builder: (context) {
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Text(
-                //   'My Appointments',
-                //   style: Theme.of(context).textTheme.headlineSmall,
-                // ),
-                // const SizedBox(
-                //   height: 15,
-                // ),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        appointmentCard(context, 'patient', appointment[index],
-                            cancelAppointment: cancelAppointment),
-                      ],
-                    );
-                  },
-                  separatorBuilder: (context, index) => myDrevider(),
-                  itemCount: appointment.length,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-      fallback: (context) => Scaffold(
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () async {
-        //     await navigatTo(context, const AddAppointmentScreen());
-        //   },
-        //   backgroundColor: const Color(0xFF2F80ED),
-        //   child: const Icon(
-        //     Icons.add,
-        //   ),
-        // ),
-        body: emptyState(context),
-      ),
     );
   }
 }
