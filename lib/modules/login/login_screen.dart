@@ -1,4 +1,5 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/modules/doctor/doctor_screen.dart';
@@ -33,6 +34,7 @@ class LoginScreen extends StatelessWidget {
           
             if (userType != state.type) {
               toast('The Account is not $userType', Colors.red);
+              FirebaseAuth.instance.signOut();
               //عملتها عشان لو الشرط صح مباشرة يقف وما يكمل الي بعدها
               return;
             }

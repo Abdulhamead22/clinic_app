@@ -152,7 +152,7 @@ class AddAppointmentScreen extends StatelessWidget {
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                               ),
-                              value: cubit.selectedTime?.replacing(),
+                              value: cubit.selectedTime,
                               items: availableTimes.map((time) {
                                 return DropdownMenuItem(
                                   value: time,

@@ -189,8 +189,11 @@ Future<bool?> toast(String text, Color color) {
 //   );
 // }
 
-Card appointmentCard(context, String type, AppointmentModels model,
-     ) {
+Card appointmentCard(
+  context,
+  String type,
+  AppointmentModels model,
+) {
   Color? statusColor;
 
   switch (model.status) {
@@ -225,10 +228,10 @@ Card appointmentCard(context, String type, AppointmentModels model,
                   fontSize: 16,
                 ),
               ),
-              if (type != 'doctor')
+              if (type != 'doctor' && model.status == 'upcoming')
                 IconButton(
                   onPressed: () {
-                    alertDialog(context, model);
+                    alertDialog1(context, model, 'cancel');
                   },
                   icon: const Icon(Icons.cancel_outlined),
                   color: Colors.red,
@@ -236,38 +239,31 @@ Card appointmentCard(context, String type, AppointmentModels model,
             ],
           ),
           const SizedBox(
-            height: 8,
+            height: 10,
           ),
-          Row(
-            children: [
-              Text(model.date.toString()),
-              const SizedBox(
-                width: 8,
-              ),
-              const Text('-'),
-              const SizedBox(
-                width: 8,
-              ),
-              Text(model.time.toString()),
-            ],
-          ),
+          Text("${model.date} - ${model.time}"),
           const SizedBox(
-            height: 8,
+            height: 10,
           ),
           Chip(
             label: Text(model.status.toUpperCase()),
             backgroundColor: statusColor,
-            labelStyle: TextStyle(
-              fontWeight: FontWeight.bold,
+            avatar: Icon(
+              model.status == 'complete'
+                  ? Icons.check
+                  : model.status == 'upcoming'
+                      ? Icons.access_time
+                      : Icons.cancel,
+              size: 16,
               color: model.status == 'complete'
                   ? Colors.green
                   : model.status == 'upcoming'
-                      ? Colors.yellow[600]
+                      ? Colors.orange
                       : Colors.red,
             ),
           ),
           const SizedBox(
-            height: 5,
+            height: 10,
           ),
           if (type == 'doctor' && model.status == 'upcoming')
             Row(
@@ -275,8 +271,9 @@ Card appointmentCard(context, String type, AppointmentModels model,
                 Expanded(
                   child: defaultButton(
                     function: () {
-                      ClinicCubit.get(context).updateStatusAppointment(
-                          model.appointmentId, 'complete');
+                      alertDialog1(context, model,'complete');
+                      // ClinicCubit.get(context).updateStatusAppointment(
+                      // model.appointmentId, 'complete');
                     },
                     fontsize: 12,
                     radies: 8,
@@ -288,8 +285,10 @@ Card appointmentCard(context, String type, AppointmentModels model,
                 Expanded(
                   child: defaultButton(
                     function: () {
-                      ClinicCubit.get(context).updateStatusAppointment(
-                          model.appointmentId, 'cancel');
+                      alertDialog1(context, model, 'cancel');
+
+                      // ClinicCubit.get(context).updateStatusAppointment(
+                      // model.appointmentId, 'cancel');
                     },
                     fontsize: 12,
                     radies: 8,
@@ -301,7 +300,7 @@ Card appointmentCard(context, String type, AppointmentModels model,
             ),
           if (type == 'doctor')
             const SizedBox(
-              height: 8,
+              height: 10,
             ),
         ],
       ),
@@ -309,14 +308,13 @@ Card appointmentCard(context, String type, AppointmentModels model,
   );
 }
 
-void alertDialog(context, AppointmentModels model) {
+void alertDialog1(context, AppointmentModels model,String state ) {
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text(
-          'Are you sure want to cancel appointment?',
-          style: TextStyle(fontSize: 16),
+        title: Text(
+          'Are you sure want to $state this appointment?',
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -329,18 +327,18 @@ void alertDialog(context, AppointmentModels model) {
               children: [
                 Expanded(
                   child: SizedBox(
-                    // width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor:
+                            state == 'complete' ? Colors.green : Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
                       child: const Text("Sure!"),
                       onPressed: () {
-                        ClinicCubit.get(context).updateStatusAppointment(
-                            model.appointmentId, 'cancel');
+                        ClinicCubit.get(context)
+                            .updateStatusAppointment(model.appointmentId, state);
                         Navigator.of(context).pop();
                       },
                     ),
@@ -375,68 +373,75 @@ void alertDialog(context, AppointmentModels model) {
         false, //مسؤولة عن امكانية غلق الشاشة عند الضغط على اي مكان بالصفحة
   );
 }
-  ConditionalBuilder buildAppointments(List<AppointmentModels> appointment,
-      {required String type}) {
-    return ConditionalBuilder(
-      condition: appointment.isNotEmpty,
-      builder: (context) {
-        return SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-          
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        appointmentCard(context, type, appointment[index],
-                        ),
-                      ],
-                    );
-                  },
-                  separatorBuilder: (context, index) => myDrevider(),
-                  itemCount: appointment.length,
-                ),
-              ],
-            ),
+
+ConditionalBuilder buildAppointments(List<AppointmentModels> appointment,
+    {required String type}) {
+  return ConditionalBuilder(
+    condition: appointment.isNotEmpty,
+    builder: (context) {
+      return SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      appointmentCard(
+                        context,
+                        type,
+                        appointment[index],
+                      ),
+                    ],
+                  );
+                },
+                separatorBuilder: (context, index) => myDrevider(),
+                itemCount: appointment.length,
+              ),
+            ],
           ),
-        );
-      },
-      fallback: (context) => 
-  
-         emptyState(context),
-      
-    );
-  }
+        ),
+      );
+    },
+    fallback: (context) => emptyState(context),
+  );
+}
+
 emptyState(context) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       // crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Icon(
+        Icon(
           Icons.calendar_month,
-          size: 50,
-          color: Colors.blue,
+          size: 60,
+          color: Colors.grey[400],
         ),
         const SizedBox(
           height: 15,
         ),
         Text(
-          'Not Appointments',
-          style: Theme.of(context).textTheme.headlineSmall,
+          'No Appointments',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.grey[700],
+              ),
+          // style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(
           height: 15,
         ),
         Text(
-          'not have  booked any appointments ',
-          style: Theme.of(context).textTheme.titleLarge,
+          'Not have booked any appointments yet ',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.grey[500],
+              ),
+          // style: Theme.of(context).textTheme.titleLarge,
         ),
       ],
     ),

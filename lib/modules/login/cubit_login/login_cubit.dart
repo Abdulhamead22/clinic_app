@@ -32,10 +32,10 @@ class ClinicLoginCubit extends Cubit<ClinicLoginState> {
             CacheHelper.saveData(key: 'uId', value: value.user!.uid);
             CacheHelper.saveData(key: 'userType', value: userType);
 
-            if (userType == "patient") {
+            // if (userType == "patient") {
               emit(ClinicLoginSuccesState(value.user!.uid, userType!));
           
-            } 
+            // } 
         
           },
         );

@@ -11,11 +11,20 @@ class AppointmentsDoctorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocConsumer<ClinicCubit, ClinicState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        // if (state is ClinicUpdateStatusSuccessState) {
+        //   toast('Success', Colors.green);
+        //   // ScaffoldMessenger.of(context).showSnackBar(
+        //   //   SnackBar(
+        //   //     content: Text("Appointment updated"),
+        //   //     backgroundColor: Colors.green,
+        //   //   ),
+        //   // );
+        // }
+      },
       builder: (context, state) {
-            var cubit = ClinicCubit.get(context);
+        var cubit = ClinicCubit.get(context);
 
         var filtered = cubit.appoin.where((a) {
           //رجع المواعيد حسب الدكتور

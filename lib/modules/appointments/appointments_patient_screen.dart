@@ -16,6 +16,7 @@ class AppointmentsPatientScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is ClinicUpdateStatusSuccessState) {
           toast("Appointment cancelled successfully", Colors.green);
+          
         }
       },
       builder: (context, state) {
