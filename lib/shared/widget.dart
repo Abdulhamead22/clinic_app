@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
@@ -195,6 +194,7 @@ Card appointmentCard(
   AppointmentModels model,
 ) {
   Color? statusColor;
+  var cubit = ClinicCubit.get(context);
 
   switch (model.status) {
     case 'complete':
@@ -208,24 +208,38 @@ Card appointmentCard(
       break;
   }
   return Card(
-    elevation: 5,
+    elevation: 2,
     color: Colors.white,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
+      side: BorderSide(
+        color: (statusColor ?? Colors.grey).withOpacity(0.5),
+      ),
     ),
     child: Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                type == 'patient' ? model.doctorName : model.patientName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.blue.shade50,
+                child: const Icon(Icons.person, size: 18, color: Colors.blue),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  //  cubit.patient.firstWhere((element) => element.patientId==model.patientId,).name,
+                  type == 'patient'
+                      ? cubit.doctors[model.doctorId]?.name ?? 'Doctor'
+                      : cubit.patient[model.patientId]?.name ?? 'Patient',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               if (type != 'doctor' && model.status == 'upcoming')
@@ -241,13 +255,36 @@ Card appointmentCard(
           const SizedBox(
             height: 10,
           ),
-          Text("${model.date} - ${model.time}"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                const SizedBox(width: 5),
+                Text(model.date),
+              ],
+            ),
+          ),
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                const SizedBox(width: 5),
+                Text(model.time),
+              ],
+            ),
+          ),
           const SizedBox(
             height: 10,
           ),
           Chip(
-            label: Text(model.status.toUpperCase()),
-            backgroundColor: statusColor,
+            label: Text(
+              model.status[0].toUpperCase() + model.status.substring(1),
+            ),
+            backgroundColor: (statusColor ?? Colors.grey).withOpacity(0.3),
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
             avatar: Icon(
               model.status == 'complete'
                   ? Icons.check
@@ -271,9 +308,7 @@ Card appointmentCard(
                 Expanded(
                   child: defaultButton(
                     function: () {
-                      alertDialog1(context, model,'complete');
-                      // ClinicCubit.get(context).updateStatusAppointment(
-                      // model.appointmentId, 'complete');
+                      alertDialog1(context, model, 'complete');
                     },
                     fontsize: 12,
                     radies: 8,
@@ -286,9 +321,6 @@ Card appointmentCard(
                   child: defaultButton(
                     function: () {
                       alertDialog1(context, model, 'cancel');
-
-                      // ClinicCubit.get(context).updateStatusAppointment(
-                      // model.appointmentId, 'cancel');
                     },
                     fontsize: 12,
                     radies: 8,
@@ -308,7 +340,7 @@ Card appointmentCard(
   );
 }
 
-void alertDialog1(context, AppointmentModels model,String state ) {
+void alertDialog1(context, AppointmentModels model, String state) {
   showDialog(
     context: context,
     builder: (context) {
@@ -337,8 +369,8 @@ void alertDialog1(context, AppointmentModels model,String state ) {
                       ),
                       child: const Text("Sure!"),
                       onPressed: () {
-                        ClinicCubit.get(context)
-                            .updateStatusAppointment(model.appointmentId, state);
+                        ClinicCubit.get(context).updateStatusAppointment(
+                            model.appointmentId, state);
                         Navigator.of(context).pop();
                       },
                     ),
@@ -416,12 +448,11 @@ emptyState(context) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      // crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           Icons.calendar_month,
           size: 60,
-          color: Colors.grey[400],
+          color: Colors.grey.shade400,
         ),
         const SizedBox(
           height: 15,
@@ -431,7 +462,6 @@ emptyState(context) {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Colors.grey[700],
               ),
-          // style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(
           height: 15,
@@ -441,9 +471,16 @@ emptyState(context) {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.grey[500],
               ),
-          // style: Theme.of(context).textTheme.titleLarge,
         ),
       ],
+    ),
+  );
+}
+
+loading() {
+  return const Center(
+    child: CircularProgressIndicator(
+      strokeWidth: 2,
     ),
   );
 }

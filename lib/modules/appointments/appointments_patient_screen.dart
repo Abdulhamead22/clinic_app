@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/cubit/clinic_state.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/appointment_models.dart';
 import 'package:flutter_application_1/models/doctor_user_model.dart';
 import 'package:flutter_application_1/modules/appointments/add_appointment_screen.dart';
@@ -21,14 +22,19 @@ class AppointmentsPatientScreen extends StatelessWidget {
       },
       builder: (context, state) {
         var cubit = ClinicCubit.get(context);
+        
+      
         var filtered = cubit.appoin.where((a) {
-          if (cubit.selectedDocotrFilter == null) {
+  if (a.patientId != uId) {
+    return false;
+  }
+  if (cubit.selectedDocotrFilter == null) {
             return true; // رجع كل شيء
-          } else {
+  }
             //رجع المواعيد حسب الدكتور
-            return a.doctorId == cubit.selectedDocotrFilter!.doctorId;
-          }
-        }).toList();
+
+  return a.doctorId == cubit.selectedDocotrFilter!.doctorId;
+}).toList();
         List<AppointmentModels> upcoming =
             filtered.where((e) => e.status == 'upcoming').toList();
 
@@ -42,6 +48,7 @@ class AppointmentsPatientScreen extends StatelessWidget {
           child: Scaffold(
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
+                // print(cubit.selectedDoctor);
                 await navigatTo(context, const AddAppointmentScreen());
               },
               backgroundColor: const Color(0xFF2F80ED),
@@ -66,7 +73,7 @@ class AppointmentsPatientScreen extends StatelessWidget {
                       child: Text("All Doctors"),
                     ),
                     //... : فك العناصر من List وحطهم مباشرة داخل List ثانية
-                    ...cubit.doctors.map((doctor) {
+                    ...cubit.doctorsList.map((doctor) {
                       return DropdownMenuItem<DoctorUserModel>(
                         value: doctor,
                         child: Text(doctor.name),

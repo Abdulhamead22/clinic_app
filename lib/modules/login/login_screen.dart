@@ -31,23 +31,22 @@ class LoginScreen extends StatelessWidget {
             toast(state.error, Colors.red);
           }
           if (state is ClinicLoginSuccesState) {
-          
             if (userType != state.type) {
               toast('The Account is not $userType', Colors.red);
               FirebaseAuth.instance.signOut();
               //عملتها عشان لو الشرط صح مباشرة يقف وما يكمل الي بعدها
               return;
             }
-          
+            Widget? screen;
             if (state.type == "patient") {
-              navigatFinish(context, const PatientScreen());
-              
+              screen= const PatientScreen();
             } else if (state.type == "doctor") {
-              navigatFinish(context, const DoctorScreen());
-              // ClinicCubit.get(context).getAppointmentsDataDoctor(ClinicCubit.get(context).appoin[index]);
+              screen= const DoctorScreen();
             } else {
               toast('The Account is UnKnow', Colors.red);
-            }  ClinicCubit.get(context).getAppointmentsData();
+            }
+            ClinicCubit.get(context).getAppointmentsData();
+            navigatFinish(context, screen);
           }
         },
         builder: (context, state) {
@@ -143,7 +142,7 @@ class LoginScreen extends StatelessWidget {
                             );
                           },
                           fallback: (context) =>
-                              const Center(child: CircularProgressIndicator()),
+                            loading()
                         ),
                         const SizedBox(
                           height: 10,

@@ -3,12 +3,25 @@ import 'package:flutter_application_1/cubit/clinic_cubit.dart';
 import 'package:flutter_application_1/cubit/clinic_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DoctorScreen extends StatelessWidget {
+class DoctorScreen extends StatefulWidget {
   const DoctorScreen({super.key});
+
+  @override
+  State<DoctorScreen> createState() => _DoctorScreenState();
+}
+
+class _DoctorScreenState extends State<DoctorScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ClinicCubit.get(context).getUserDoctorAllData();
+    ClinicCubit.get(context).getAllPatientsData();
+  }
 
   @override
   Widget build(BuildContext context) {
     var cubit = ClinicCubit.get(context);
+    // cubit.getUserDoctorAllData();
     return BlocConsumer<ClinicCubit, ClinicState>(
       listener: (context, state) {},
       builder: (context, state) {
@@ -24,10 +37,7 @@ class DoctorScreen extends StatelessWidget {
                 onPressed: () {
                   cubit.signOut(context);
                 },
-                icon: const Icon(
-                  Icons.logout_outlined,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.logout_outlined, color: Colors.white),
               )
             ],
           ),

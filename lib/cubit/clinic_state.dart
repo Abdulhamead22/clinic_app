@@ -10,6 +10,12 @@ class ClinicGetPatientDataSuccessState extends ClinicState {}
 
 class ClinicGetPatientDataErrorState extends ClinicState {}
 
+class ClinicGetAllPatientDataLoadingState extends ClinicState {}
+
+class ClinicGetAllPatientDataSuccessState extends ClinicState {}
+
+class ClinicGetAllPatientDataErrorState extends ClinicState {}
+
 class ClinicChangeSelectedDoctorState extends ClinicState{}
 
 class ClinicChangeDateState extends ClinicState{}
@@ -34,6 +40,11 @@ class ClinicGetDoctorDataSuccessState extends ClinicState {}
 
 class ClinicGetDoctorDataErrorState extends ClinicState {}
 
+class ClinicGetFilterDoctorDataLoadingState extends ClinicState {}
+
+class ClinicGetFilterDoctorDataSuccessState extends ClinicState {}
+
+class ClinicGetFilterDoctorDataErrorState extends ClinicState {}
 
 class ClinicUpdateStatusSuccessState extends ClinicState {}
 
@@ -52,3 +63,7 @@ class ClinicCancelAppointmentsSuccessState extends ClinicState {}
 class ClinicCancelAppointmentsErrorState extends ClinicState {}
 
 class ClinicChangeDoctorFilterState extends ClinicState{}
+
+class ClinicChangeNameState extends ClinicState{}
+
+class ClinicChangeThemeState extends ClinicState{}

@@ -50,8 +50,7 @@ class RoleSelectionScreen extends StatelessWidget {
           children: [
             const Icon(Icons.medical_services, color: Colors.white, size: 50),
             const SizedBox(height: 10),
-            Text(type,
-                style: const TextStyle(fontSize: 24, color: Colors.white)),
+            Text(type, style: const TextStyle(fontSize: 24, color: Colors.white)),
             const SizedBox(height: 5),
           ],
         ),

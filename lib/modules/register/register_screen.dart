@@ -147,7 +147,7 @@ class RegisterScreen extends StatelessWidget {
                           },
                           condition: state is! ClinicRegisterLodingState,
                           fallback: (context) =>
-                              const Center(child: CircularProgressIndicator()),
+                            loading()
                         ),
                       ],
                     ),

@@ -21,6 +21,7 @@ class ClinicCubit extends Cubit<ClinicState> {
   AppointmentModels? appointmentModels;
   PatientUserModel? patientModel;
   DoctorUserModel? doctorModel;
+
   DoctorUserModel? selectedDocotrFilter;
 
   //دالة جلب بيانات المريض
@@ -28,9 +29,10 @@ class ClinicCubit extends Cubit<ClinicState> {
     emit(ClinicGetPatientDataLoadingState());
     FirebaseFirestore.instance.collection('users').doc(uId).get().then(
       (value) {
-        //  print(value.data());
+        // getAllPatientsData();
         patientModel = PatientUserModel.fromJson(value.data());
-        print('Patient model: ${patientModel?.toMap()}');
+
+        // print('Patient model: ${patientModel?.toMap()}');
 
         emit(ClinicGetPatientDataSuccessState());
       },
@@ -39,32 +41,75 @@ class ClinicCubit extends Cubit<ClinicState> {
     });
   }
 
-  //دالة جلب بيانات الدكتور
-  List<DoctorUserModel> doctors = [];
+//دالة جلب كل بيانات الدكاترة
+  Map<String, PatientUserModel> patient = {};
+  List<PatientUserModel> patientList = [];
+
+  void getAllPatientsData() {
+    emit(ClinicGetAllPatientDataLoadingState());
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .where('type', isEqualTo: 'patient')
+        .snapshots()
+        .listen((value) {
+      patient.clear();
+      patientList.clear();
+
+      for (var element in value.docs) {
+        patient[element.id] = PatientUserModel.fromJson(element.data());
+        patientList.add(patient[element.id]!);
+      }
+
+      emit(ClinicGetAllPatientDataSuccessState());
+    }, onError: (error) {
+      emit(ClinicGetAllPatientDataErrorState());
+    });
+  }
+
+//   //دالة جلب بيانات الدكتور
+  Future<void> getUserDoctorAllData() async {
+    try {
+      emit(ClinicGetDoctorDataLoadingState());
+
+      getUserDoctorData();
+      final value =
+          await FirebaseFirestore.instance.collection('users').doc(uId).get();
+
+      doctorModel = DoctorUserModel.fromJson(value.data()!);
+
+      emit(ClinicGetDoctorDataSuccessState());
+    } catch (error) {
+      emit(ClinicGetDoctorDataErrorState());
+    }
+  }
+
+//هنا استخدمنا map لانها اسرع وافضل
+  Map<String, DoctorUserModel> doctors = {};
+  List<DoctorUserModel> doctorsList = [];
+
   void getUserDoctorData() {
-    emit(ClinicGetDoctorDataLoadingState());
+    emit(ClinicGetFilterDoctorDataLoadingState());
     FirebaseFirestore.instance
         .collection('users')
         .where('type', isEqualTo: 'doctor')
-        .get()
-        .then(
-      (value) {
-        doctors = [];
-        selectedDoctor = null;
-        selectedTime = null;
+        .snapshots()
+        .listen((value) {
+      doctors.clear();
+      doctorsList.clear();
 
-        for (var element in value.docs) {
-          doctors.add(
-            DoctorUserModel.fromJson(
-              element.data(),
-            ),
-          );
-        }
+      selectedDoctor = null;
+      selectedTime = null;
+      for (var element in value.docs) {
+        doctors[element.id] = DoctorUserModel.fromJson(
+          element.data(),
+        );
+        doctorsList.add(doctors[element.id]!);
+      }
 
-        emit(ClinicGetDoctorDataSuccessState());
-      },
-    ).catchError((error) {
-      emit(ClinicGetDoctorDataErrorState());
+      emit(ClinicGetFilterDoctorDataSuccessState());
+    }, onError: (error) {
+      emit(ClinicGetFilterDoctorDataErrorState());
     });
   }
 
@@ -122,22 +167,19 @@ class ClinicCubit extends Cubit<ClinicState> {
 
     var dataId = FirebaseFirestore.instance.collection('appointments').doc();
     appointmentModels = AppointmentModels(
-      doctorName: selectedDoctor!.name,
       date: date,
       time: time,
       status: 'upcoming',
       patientId: patientModel!.patientId,
-      patientName: patientModel!.name,
       appointmentId: dataId.id,
       doctorId: selectedDoctor!.doctorId,
     );
 
-    print('Saving appointment: ${appointmentModels!.toMap()}');
+    // print('Saving appointment: ${appointmentModels!.toMap()}');
 
     dataId.set(appointmentModels!.toMap()).then(
       (value) {
         emit(ClinicAddAppointmentsSuccessState());
-        print('Success Add');
       },
     ).catchError((error) {
       emit(ClinicAddAppointmentsErrorState());
@@ -188,7 +230,7 @@ class ClinicCubit extends Cubit<ClinicState> {
         getAppointmentsData();
       },
     ).catchError((error) {
-      print('Upadate Error ');
+      ('Upadate Error ');
       emit(ClinicUpdateStatusErrorState());
     });
   }
@@ -235,12 +277,35 @@ class ClinicCubit extends Cubit<ClinicState> {
   //   });
   // }
 
-
-
-
 //تغيير الدكتور حسب الفلترة
   void changeFilterDoctor(selectedFilter) {
     selectedDocotrFilter = selectedFilter;
     emit(ClinicChangeDoctorFilterState());
+  }
+
+  //تغيير الاسم
+  void changeName(String name) {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uId!)
+        .update({'name': name});
+
+    if (doctorModel != null) {
+      doctorModel!.name = name;
+    }
+
+    if (patientModel != null) {
+      patientModel!.name = name;
+    }
+
+    emit(ClinicChangeNameState());
+  }
+
+  bool isDark = false;
+
+  void changeTheme() {
+    isDark = !isDark;
+    CacheHelper.saveData(key: 'isDark', value: isDark);
+    emit(ClinicChangeThemeState());
   }
 }

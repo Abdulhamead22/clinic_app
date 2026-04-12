@@ -25,7 +25,7 @@ class AddAppointmentScreen extends StatelessWidget {
       const TimeOfDay(hour: 15, minute: 0),
     ];
 
-    cubit.getUserDoctorData();
+    // cubit.getUserDoctorData();
     return BlocConsumer<ClinicCubit, ClinicState>(
       listener: (context, state) {
         if (state is ClinicChangeDateState) {
@@ -70,8 +70,7 @@ class AddAppointmentScreen extends StatelessWidget {
                               height: 5,
                             ),
                             state is ClinicGetDoctorDataLoadingState
-                                ? const Center(
-                                    child: CircularProgressIndicator())
+                                ? loading()
                                 : DropdownButtonFormField<DoctorUserModel>(
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(
@@ -81,7 +80,7 @@ class AddAppointmentScreen extends StatelessWidget {
                                       // filled: true,
                                     ),
                                     value: cubit.selectedDoctor,
-                                    items: cubit.doctors.map((doctor) {
+                                    items: cubit.doctorsList.map((doctor) {
                                       return DropdownMenuItem<DoctorUserModel>(
                                         value: doctor,
                                         child: Text(doctor.name),
@@ -167,8 +166,9 @@ class AddAppointmentScreen extends StatelessWidget {
                                 }
                               },
                               validator: (value) {
-                                if (value == null)
+                                if (value == null) {
                                   return "Please select a time";
+                                }
                                 return null;
                               },
                               hint: const Text('Choose Time'),
@@ -209,11 +209,10 @@ class AddAppointmentScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: state is ClinicCheckAppointmentsLoadingState
-                              ? const Center(child: CircularProgressIndicator())
+                              ? loading()
                               : defaultButton(
                                   function: () {
-                                    print(
-                                        'PatientId: ${cubit.patientModel?.patientId}');
+                                    // print('PatientId: ${cubit.patientModel?.patientId}');
 
                                     if (formkey.currentState!.validate()) {
                                       cubit.checkAndAddAppointment(

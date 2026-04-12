@@ -1,5 +1,5 @@
 class DoctorUserModel {
-  final String name;
+   String name;
   final String email;
   final String phone;
   final String doctorId;

@@ -23,18 +23,18 @@ class ClinicRegisterCubit extends Cubit<ClinicRegisterState> {
     )
         .then(
       (value) {
-        print(value.user?.email);
+        // print(value.user?.email);
         userCreate(
           name: name,
           email: email,
           phone: phone,
           uId: value.user!.uid,
         );
-        print('Succes register');
+        // print('Succes register');
         //    emit(ClinicRegisterSuccesState());
       },
     ).catchError((error) {
-      print('Error: ${error.toString()}');
+      // print('Error: ${error.toString()}');
       emit(ClinicRegisterErrorState(error.toString()));
     });
   }
